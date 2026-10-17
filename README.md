@@ -21,8 +21,7 @@ This plugin adds a Panel Area and menu button to locate site images missing an a
 
 ## Compatibility
 
-* Kirby 4.x
-* Kirby 5.x
+* Kirby 6.x
 
 ## Disclaimer
 
