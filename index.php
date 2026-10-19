@@ -3,27 +3,32 @@
 require_once __DIR__ . '/classes/CheckFiles.php';
 
 use Scottboms\Check\CheckFiles;
-use Composer\Semver\Semver;
-use Kirby\Cms\App;
-use Kirby\Toolkit\F;
+use Scottboms\Check\ThumbnailField;
+use Kirby\Cms\App as Kirby;
 
-// shamelessly borrowed from distantnative/retour-for-kirby
+require_once __DIR__ . '/fields/ThumbnailField.php';
+
+$version = Kirby::version() ?? '0.0.0';
 if (
-	version_compare(App::version() ?? '0.0.0', '6.0.0', '<') === true ||
-	version_compare(App::version() ?? '0.0.0', '7.0.0', '>=') === true
+	version_compare($version, '6.0.0-beta.1', '<') ||
+	version_compare($version, '7.0.0', '>=')
 ) {
-	throw new Exception('Template Checker requires Kirby v6');
+	throw new Exception('Template Checker requires Kirby 6');
 }
 
-Kirby::plugin(
-	name: 'scottboms/template-checker',
+Kirby::plugin('scottboms/template-checker',
 	info: [
 		'homepage' => 'https://github.com/scottboms/template-checker',
-		'license'  => 'MIT'
+		'license'  => 'MIT',
+		'version'  => '6.0.0',
+		'authors'  => [[ 'name' => 'Scott Boms']]
 	],
-	version: '6.0.0',
+
 	extends: [
 	'options' => [],
+	'fields' => [
+		'thumbnail' => ThumbnailField::class
+	],
 	'areas' => [
 		'checker' => function ($kirby) {
 			return [
@@ -38,19 +43,18 @@ Kirby::plugin(
 					[
 						'pattern' => 'checker/images',
 						'action'  => function () {
-							$user = kirby()->user();
-							//$checker = new CheckFiles();
+							$checker = new CheckFiles();
+
 							//$images = $checker->findImagesWithoutContentOrTemplate();
 							//$templates = $checker->availableFileTemplates();
-
 							// dump($templates); // DEBUG
 
 							return [
 								'component' => 'k-image-template-checker',
 								'title' => 'Images Without Template',
 								'props' => [
-									'images' => (new CheckFiles())->findImagesWithoutContentOrTemplate(),
-									'availableTemplates' => (new CheckFiles())->availableFileTemplates()
+									'images' => $checker->findImagesWithoutContentOrTemplate(),
+									'availableTemplates' => $checker->availableFileTemplates()
 								]
 							];
 						}

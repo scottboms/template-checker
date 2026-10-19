@@ -32,21 +32,25 @@ export default {
 			default: () => []
 		}
 	},
-	data() {
-		return {
-			selectedImage: null,
-			templateDrawer: false, // DEBUG, set to true
-		};
-	},
-  watch: {
-		templateDrawer(open) {
-			// console.log('templateDrawer changed:', open);
-		}
-	},
+
+	// data() {
+// 		return {
+// 			selectedImage: null,
+// 			templateDrawer: false, // DEBUG, set to true
+// 		};
+// 	},
+
+	// watch: {
+// 		templateDrawer(open) {
+// 			// console.log('templateDrawer changed:', open);
+// 		}
+// 	},
+
+
 	computed: {
 		items() {
 
-			return this.images.map((image, index) => ({
+			return this.images.map((image) => ({
 				text: image.filename,
 				info: image.parent,
 				link: image.fileUrl,
@@ -76,99 +80,104 @@ export default {
 			}));
 		}
 	},
+
 	methods: {
 		handleTemplateSubmit(formData) {
-			const { key, template, alt } = formData;
+		  const { key, template, alt } = formData;
 
-			this.$api.post('checker/assign', { key, template, alt })
-			.then(() => {
-				panel.drawer.close();
-				panel.notification.success({
-					message: `Changes saved`,
-					timeout: 4000
-				});
+		  this.$api.post("checker/assign", {
+		    key,
+		    template,
+		    alt
+		  })
+		  .then(() => {
+		    this.$panel.drawer.close();
 
-				panel.view.reload(); // reload view
-			})
-			.catch(() => {
-				panel.notification.error({
-					message: 'An error occurred',
-					timeout: 4000
-				});
-			});
+		    this.$panel.notification.success({
+		      message: "Changes saved",
+		      timeout: 4000
+		    });
+
+		    this.$panel.view.reload();
+		  })
+		  .catch((error) => {
+		    console.error("Template assignment failed:", error);
+
+		    this.$panel.notification.error({
+		      message: "An error occurred",
+		      timeout: 4000
+		    });
+		  });
 		},
 
 		openTemplateSelector(image) {
 			// console.log('Opening Drawer with File ID:', image.id);
-
 			this.$panel.drawer.open({
-				component: 'k-form-drawer',
+				component: "k-form-drawer",
+
 				props: {
-					title: 'Quick Edit',
-					icon: 'image',
+					title: "Quick Edit",
+					icon: "image",
+
 					fields: {
-						'preview': {
-							'label': 'Preview',
-							'type': 'thumbnail',
-							'width': '1/1',
-							'src': image.thumbUrl,
-							'alt': image.alt || '',
-							'size': image.size,
-							'filename': image.filename
+						preview: {
+							label: "Preview",
+							type: "thumbnail",
+							width: "1/1",
+							src: image.thumbUrl,
+							alt: image.alt || "",
+							size: image.size,
+							filename: image.filename
 						},
-						...(this.availableTemplates.length === 0 
+
+						...(this.availableTemplates.length === 0
 							? {
-								'notice': {
-									'label': 'Notice',
-									'type': 'info',
-									'icon': 'info',
-									'theme': 'warning',
-									'text': 'No file blueprints are available. You need to create one first.'
-								}
-							} 
-							: {
-								'template': {
-									'label': 'Template',
-									'type': 'select',
-									'required': true,
-									'disabled': this.availableTemplates.length === 0,
-									'options': this.availableTemplates,
-									'value': image.templateInContent || null,
-									'width': '1/1',
-									'help': 'Choose an available file template'
+								notice: {
+									label: "Notice",
+									type: "info",
+									icon: "info",
+									theme: "warning",
+									text: "No file blueprints are available. You need to create one first."
 								}
 							}
-						),
-						'alt': {
-							'label': 'Alt Text',
-							'type': 'textarea',
-							'buttons': false,
-							'size': 'medium',
-							'value': `${image.alt}`,
-							'width': '1/1'
-						},
-						'filename': {
-							'label': 'File',
-							'type': 'hidden',
-							'text': `${image.id}`,
-							'width': '1/1',
+						: {
+							template: {
+								label: "Template",
+								type: "select",
+								required: true,
+								options: this.availableTemplates,
+								width: "1/1",
+								help: "Choose an available file template"
+							}
+						}),
+
+						alt: {
+							label: "Alt Text",
+							type: "textarea",
+							buttons: false,
+							size: "medium",
+							width: "1/1"
 						}
 					},
+
 					value: {
 						key: image.id,
 						template: image.templateInContent || null,
-						alt: image.alt,
-					},
+						alt: image.alt || ""
+					}
 				},
+
 				on: {
-					submit: this.handleTemplateSubmit.bind(this)
+					submit: (values) => this.handleTemplateSubmit(values)
 				}
 			});
 		},
+
 		closeDrawer() {
 			this.$panel.drawer.close();
 		}
 	},
+
 	mounted() {
 		// debugging
 		// console.log('Image Props:', this.images);
