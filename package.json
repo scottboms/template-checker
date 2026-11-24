@@ -2,7 +2,7 @@
 	"name": "template-checker",
 	"description": "Locate images missing an associated file template.",
 	"author": "Scott Boms <plugins@scottboms.com>",
-	"version": "1.2.2",
+	"version": "1.2.3",
 	"type": "kirby-plugin",
 	"license": "MIT",
 	"scripts": {
